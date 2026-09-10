@@ -9,15 +9,18 @@ The design preserves required on-premises dependencies while adding modern secur
 ## Architecture Overview
 
 ```mermaid
-flowchart LR
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#102A43", "lineColor": "#486581"}, "flowchart": {"nodeSpacing": 50, "rankSpacing": 70, "padding": 20}}}%%
+flowchart TB
 
     subgraph EXISTING["Existing Environment"]
+        direction LR
         AD["Active Directory<br/>Windows Server"]
         DEV["Windows Endpoints"]
         M365["Microsoft 365"]
     end
 
     subgraph IDMGMT["Identity & Management"]
+        direction LR
         CONNECT["Microsoft Entra Connect<br/>Password Hash Sync"]
         ENTRA["Microsoft Entra ID"]
         IDP["Entra ID Protection P2"]
@@ -26,12 +29,14 @@ flowchart LR
     end
 
     subgraph SECURITY["Security Protection & Exposure"]
+        direction LR
         ENDPOINT["Microsoft Defender<br/>Endpoint Protection"]
         MDO["Defender for Office 365 P2"]
         EXPOSURE["Microsoft Security<br/>Exposure Management"]
     end
 
     subgraph OPERATIONS["Security Operations"]
+        direction LR
         XDR["Microsoft Defender XDR"]
         SENTINEL["Microsoft Sentinel<br/>(Log Analytics workspace)"]
         PORTAL["Microsoft Defender Portal<br/>Unified Security Operations"]
@@ -119,7 +124,8 @@ Detailed data paths and integration boundaries are documented in the [Technical 
 ## Security Lifecycle
 
 ```mermaid
-flowchart LR
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#102A43", "lineColor": "#486581"}, "flowchart": {"nodeSpacing": 50, "rankSpacing": 70, "padding": 20}}}%%
+flowchart TB
 
     BUILD["BUILD<br/>Hybrid identity<br/>Endpoint integration"]
 
@@ -154,4 +160,3 @@ The architecture is designed to provide:
 - centralized detection, investigation, hunting, and response across security domains
 
 The resulting model is designed to reduce the likelihood and potential impact of compromise while improving an organization's ability to detect, investigate, contain, and respond to security events.
-
