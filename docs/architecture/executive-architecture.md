@@ -2,11 +2,9 @@
 
 ## Microsoft Hybrid Security Platform
 
-The Microsoft Hybrid Security Platform extends an existing Windows and Active Directory environment with cloud-based identity protection, endpoint management, threat protection, exposure management, XDR, and SIEM capabilities.
+The Microsoft Hybrid Security Platform extends an existing Windows Server and Active Directory environment with cloud identity, centralized endpoint management, Microsoft 365 protection, exposure management, XDR, and SIEM capabilities.
 
-The architecture preserves required on-premises dependencies while introducing centralized security management and a unified security operations workflow.
-
----
+The design preserves required on-premises dependencies while adding modern security controls and a unified operational experience across identity, endpoints, Microsoft 365, exposure, detection, investigation, and response.
 
 ## Architecture Overview
 
@@ -19,185 +17,104 @@ flowchart LR
         M365["Microsoft 365"]
     end
 
-    subgraph IDENTITY["Identity & Access"]
-        CONNECT["Microsoft Entra Connect"]
+    subgraph IDMGMT["Identity & Management"]
+        CONNECT["Microsoft Entra Connect<br/>Password Hash Sync"]
         ENTRA["Microsoft Entra ID"]
         IDP["Entra ID Protection P2"]
-        ACCESS["MFA / Conditional Access"]
-    end
-
-    subgraph MANAGEMENT["Endpoint Management"]
+        ACCESS["Access Controls<br/>MFA • Conditional Access"]
         INTUNE["Microsoft Intune"]
     end
 
-    subgraph SECURITY["Security Protection"]
-        MDE["Microsoft Defender<br/>Endpoint Security"]
+    subgraph SECURITY["Security Protection & Exposure"]
+        ENDPOINT["Microsoft Defender<br/>Endpoint Protection"]
         MDO["Defender for Office 365 P2"]
         EXPOSURE["Microsoft Security<br/>Exposure Management"]
     end
 
     subgraph OPERATIONS["Security Operations"]
         XDR["Microsoft Defender XDR"]
-        SENTINEL["Microsoft Sentinel<br/>Log Analytics"]
-        SOC["Unified Microsoft Defender<br/>Security Operations"]
+        SENTINEL["Microsoft Sentinel<br/>(Log Analytics workspace)"]
+        PORTAL["Microsoft Defender Portal<br/>Unified Security Operations"]
     end
 
-    AD -->|"Hybrid identity"| CONNECT
+    AD -->|"Identity synchronization"| CONNECT
     CONNECT --> ENTRA
 
-    AD -->|"Domain / GPO"| DEV
+    AD -->|"Domain membership / GPO"| DEV
+    DEV -.->|"Hybrid device identity"| ENTRA
 
     ENTRA --> IDP
     ENTRA --> ACCESS
-    ENTRA --> INTUNE
+    ENTRA -.->|"Identity / device context"| INTUNE
 
-    INTUNE -->|"Centralized management"| DEV
+    INTUNE -->|"Cloud management"| DEV
 
-    DEV -->|"Endpoint telemetry"| MDE
+    DEV -->|"Endpoint security telemetry"| ENDPOINT
     M365 -->|"Email & collaboration signals"| MDO
 
-    MDE --> XDR
+    ENDPOINT --> XDR
     MDO --> XDR
 
-    MDE --> EXPOSURE
+    ENDPOINT -.->|"Endpoint risk context"| EXPOSURE
+    ENTRA -.->|"Identity context"| EXPOSURE
 
     ENTRA -->|"Identity & activity telemetry"| SENTINEL
 
-    XDR --> SOC
-    SENTINEL --> SOC
-    EXPOSURE --> SOC
+    XDR -.->|"Operational integration"| PORTAL
+    SENTINEL -.->|"SIEM integration"| PORTAL
+    EXPOSURE -.->|"Exposure context"| PORTAL
 ```
 
-The arrows represent different architectural relationships. Identity synchronization, management, security telemetry, and security-operations integration are separate flows and should not be interpreted as one common data path.
+The arrows represent different architectural relationships. Identity synchronization, device identity, management, security telemetry, exposure context, and security-operations integration are separate flows and should not be interpreted as one common data path.
 
----
+## Preserve and Extend the Existing Environment
 
-## Preserve Existing Infrastructure
+Active Directory remains responsible for domain identities, domain-joined Windows devices, Group Policy, and other traditional Windows dependencies.
 
-Active Directory remains in place for domain identities, Windows devices, Group Policy, and other dependencies that still require traditional Windows infrastructure.
+Microsoft Entra Connect extends selected on-premises identities into Microsoft Entra ID using Password Hash Synchronization. Windows endpoints can remain domain joined while also participating in Microsoft Entra device identity and cloud-based management.
 
-Microsoft Entra Connect extends existing identities into Microsoft Entra ID instead of requiring an immediate cloud-only migration.
+This supports hybrid modernization without requiring an immediate replacement of existing Windows infrastructure.
 
----
+## Identity and Endpoint Management
 
-## Strengthen Identity & Access
+Microsoft Entra ID provides the cloud identity and access layer. Microsoft Authenticator, multifactor authentication, Conditional Access, device context, and Entra ID Protection add stronger authentication, contextual access control, and identity-risk visibility.
 
-Microsoft Entra ID provides the cloud identity and access layer.
+Microsoft Intune adds centralized cloud-based endpoint management while Group Policy remains available for required domain-based configuration.
 
-The architecture combines:
+The responsibilities remain separate:
 
-- synchronized identities
-- Microsoft Authenticator
-- multifactor authentication
-- Conditional Access
-- device identity
-- Microsoft Entra ID Protection P2
+- Group Policy provides domain-based configuration.
+- Intune provides cloud-based device management and configuration.
+- Microsoft Defender provides endpoint security, detection, investigation, and response.
+- MFA, Conditional Access, and Entra ID Protection provide different identity-security controls.
 
-This adds stronger authentication, contextual access control, and identity-risk capabilities around the existing identity model.
+This allows cloud management and identity protection to be introduced without treating the different control planes as one system.
 
----
+## Security Protection and Exposure Reduction
 
-## Centralize Endpoint Management
+Microsoft Defender endpoint protection provides prevention, endpoint telemetry, EDR, investigation, and remote response capabilities.
 
-Microsoft Intune introduces centralized cloud-based endpoint management while Group Policy remains available for required domain-based configuration.
+Microsoft Defender for Office 365 Plan 2 protects email and collaboration workloads and contributes relevant security signals to broader Microsoft Defender XDR investigations.
 
-The architecture therefore supports gradual modernization rather than requiring an immediate replacement of the existing management model.
+Microsoft Security Exposure Management and Defender Vulnerability Management provide preventive visibility into vulnerabilities, security configuration weaknesses, critical assets, attack surface, security recommendations, and remediation priorities.
 
----
+Exposure information is broader than endpoint alerts alone and can include context from devices, identities, and other connected security assets.
 
-## Protect Endpoints
+Microsoft Secure Score provides an additional posture view and should not be interpreted as the same metric as Exposure Score.
 
-Microsoft Defender endpoint security provides:
+## SIEM and Unified Security Operations
 
-- malware prevention
-- endpoint telemetry
-- EDR
-- centralized security visibility
-- incident investigation
-- remote scanning
-- device isolation
-- Live Response
-- response-action tracking
+Microsoft Entra identity and activity telemetry is ingested into a Log Analytics workspace and analyzed with Microsoft Sentinel.
 
-Endpoints therefore become centrally manageable security assets instead of locally protected standalone systems.
-
----
-
-## Protect Microsoft 365
-
-Microsoft Defender for Office 365 Plan 2 extends protection into email and collaboration workloads.
-
-The security model includes protection and investigation capabilities around:
-
-- phishing
-- malware
-- attachments
-- URLs
-- quarantine
-- post-delivery threats
-- automated investigation
-- Microsoft Teams
-
-Email and collaboration signals can contribute to wider Microsoft Defender XDR investigations.
-
----
-
-## Reduce Exposure Before Incidents
-
-Microsoft Security Exposure Management and Defender Vulnerability Management provide visibility into:
-
-- vulnerabilities
-- security configuration weaknesses
-- security recommendations
-- Exposure Score
-- Secure Score
-- critical assets
-- attack surface
-- remediation priorities
-
-This adds a preventive layer designed to reduce security risk before weaknesses become part of an active incident.
-
----
-
-## Extend Visibility with SIEM
-
-Microsoft Entra identity and activity telemetry is collected into Log Analytics and Microsoft Sentinel.
-
-Sentinel adds:
-
-- SIEM telemetry
-- Log Analytics
-- KQL
-- security analytics
-- deeper identity investigation context
-- extensibility to additional data sources
+Microsoft Sentinel provides SIEM analytics, KQL-based investigation, hunting, and extensibility to additional data sources.
 
 Microsoft Sentinel complements Microsoft Defender XDR rather than replacing it.
 
----
+Microsoft Defender XDR, Microsoft Sentinel, and Microsoft Security Exposure Management retain distinct technical responsibilities. The Microsoft Defender portal provides the unified operational experience through which these capabilities can be used together for posture management, detection, investigation, hunting, exposure reduction, and response.
 
-## Unified Security Operations
+The Defender portal is therefore the operational layer and should not be interpreted as evidence that Defender XDR, Sentinel, and Exposure Management share one common backend or datastore.
 
-Microsoft Defender XDR, Microsoft Sentinel, and Microsoft Security Exposure Management retain distinct technical responsibilities.
-
-They are used together through the Microsoft Defender security operations experience.
-
-```mermaid
-flowchart LR
-
-    XDR["Microsoft Defender XDR"]
-    SENTINEL["Microsoft Sentinel"]
-    EXPOSURE["Security Exposure Management"]
-    PORTAL["Unified Microsoft Defender<br/>Security Operations"]
-
-    XDR --> PORTAL
-    SENTINEL --> PORTAL
-    EXPOSURE --> PORTAL
-```
-
-This provides a coordinated working model for prevention, detection, investigation, exposure reduction, and response.
-
----
+Detailed data paths and integration boundaries are documented in the [Technical Architecture](technical-architecture.md).
 
 ## Security Lifecycle
 
@@ -219,30 +136,22 @@ flowchart LR
     BUILD --> PROTECT --> REDUCE --> DETECT --> INVESTIGATE --> RESPOND
 ```
 
-The platform is designed around a complete lifecycle:
+The platform is organized around the operating lifecycle:
 
 **Build → Protect → Reduce Exposure → Detect → Investigate → Respond**
 
----
+This represents an operational security model rather than a linear telemetry or data flow. These activities can operate continuously and in parallel.
 
 ## Business Outcomes
 
-The architecture provides:
+The architecture is designed to provide:
 
-- preservation of necessary on-premises infrastructure
-- hybrid identity modernization
-- stronger authentication and access controls
-- identity-risk visibility
-- centralized endpoint management
-- centralized endpoint protection
+- preservation and modernization of required hybrid infrastructure
+- stronger identity, authentication, and access controls
+- centralized endpoint management, protection, and response
 - Microsoft 365 threat protection
-- proactive vulnerability and exposure management
-- SIEM-based telemetry collection
-- KQL-based investigation
-- cross-domain XDR investigation
-- remote endpoint containment and response
-- unified security operations
+- proactive vulnerability and exposure reduction
+- centralized detection, investigation, hunting, and response across security domains
 
-The resulting model improves both sides of security operations:
+The resulting model is designed to reduce the likelihood and potential impact of compromise while improving an organization's ability to detect, investigate, contain, and respond to security events.
 
-**reducing the likelihood and potential impact of compromise while improving the organization's ability to detect, investigate, contain, and respond when security events occur.**
