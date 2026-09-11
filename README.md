@@ -31,9 +31,11 @@ The goal is to connect them into one operational security architecture.
 
 ---
 
-## Executive Architecture
+## Technical Architecture
 
-The current executive architecture diagram and its supporting explanation are maintained in the [Executive Architecture](docs/architecture/executive-architecture.md) document. Detailed engineering relationships are documented in the [Technical Architecture](docs/architecture/technical-architecture.md) document.
+![Technical architecture](assets/architecture/technical-architecture.svg)
+
+[Executive Architecture](docs/architecture/executive-architecture.md)
 
 ---
 
@@ -107,6 +109,8 @@ Validated capabilities include:
 ### Exposure & Vulnerability Management
 
 The project includes a preventive-security layer designed to reduce risk before an incident occurs.
+
+![Microsoft Security Exposure Management](assets/evidence/Screenshot%202026-09-10%20140546.png)
 
 Capabilities include:
 
@@ -215,6 +219,8 @@ Microsoft Security Exposure Management contributes preventive risk, vulnerabilit
 ### 1. Endpoint Incident Investigation & Response
 
 A controlled EICAR security event was used to validate the complete endpoint incident lifecycle.
+
+![Microsoft Defender incident investigation](assets/evidence/Screenshot%202026-09-10%20134000.png)
 
 The workflow included:
 
