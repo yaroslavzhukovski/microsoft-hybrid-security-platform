@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1840" viewBox="0 0 1000 1840" role="img" aria-labelledby="title description">
+<title id="title">Microsoft Hybrid Security Platform — Technical Architecture</title>
+<desc id="description">One domain-joined, Entra Hybrid Joined, Intune-managed Windows 11 endpoint. AD DS on DC01 synchronizes through Entra Connect to Entra ID. Intune manages the endpoint; Defender for Endpoint and Defender for Office 365 contribute to Defender XDR. Entra Diagnostic Settings exports selected logs to yaru-sentinel-law, used by Sentinel. The Defender portal presents XDR, SIEM and exposure views and initiates endpoint response through MDE. Registration and compliance return to Entra ID. Sentinel collection is limited to Entra logs and ingestion is partial.</desc>
+<defs>
+  <marker id="data-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#52657D"/></marker>
+</defs>
+<style>
+  text { font-family: "Segoe UI", Arial, sans-serif; fill: #18324D; }
+  .section { font-size: 20px; font-weight: 600; letter-spacing: .8px; }
+  .heading { font-size: 24px; font-weight: 600; }
+  .body { font-size: 20px; }
+  .edge { fill: none; stroke: #52657D; stroke-width: 2.4; stroke-linejoin: round; }
+  .control { stroke-dasharray: 7 5; }
+  .label { font-size: 20px; fill: #354A60; paint-order: stroke; stroke: #FFFFFF; stroke-width: 7px; stroke-linejoin: round; }
+</style>
+<rect width="1000" height="1840" fill="#FFFFFF"/>
+
+<text x="40" y="46" class="heading" text-anchor="start" style="font-size:30px">Microsoft Hybrid Security Platform</text>
+<text x="40" y="80" class="body" text-anchor="start" >Technical architecture · Implemented environment</text>
+<rect x="30" y="108" width="940" height="206" rx="12" fill="#F7F9FC" stroke="#D9E3ED" stroke-width="1.5"/>
+<text x="48" y="136" class="section" text-anchor="start" >HYBRID IDENTITY</text>
+<rect x="30" y="403" width="280" height="642" rx="12" fill="#F7FAFC" stroke="#D9E3ED" stroke-width="1.5"/>
+<rect x="360" y="403" width="280" height="642" rx="12" fill="#FFFCF7" stroke="#D9E3ED" stroke-width="1.5"/>
+<rect x="690" y="403" width="280" height="642" rx="12" fill="#FAF8FE" stroke="#D9E3ED" stroke-width="1.5"/>
+<text x="170" y="384" class="section" text-anchor="middle" >WINDOWS ENDPOINT</text>
+<text x="500" y="384" class="section" text-anchor="middle" >MICROSOFT 365</text>
+<text x="830" y="384" class="section" text-anchor="middle" >ENTRA LOGS / SIEM</text>
+<path d="M 300 221 H 370" class="edge" marker-end="url(#data-arrow)"/>
+<text x="335" y="205" class="label" text-anchor="middle" >Sync</text>
+<path d="M 630 221 H 700" class="edge" marker-end="url(#data-arrow)"/>
+<text x="665" y="205" class="label" text-anchor="middle" >Sync</text>
+<path d="M 80 292 V 339 H 19 V 709 H 40" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="73" y="333" class="label" text-anchor="middle" >GPO</text>
+<path d="M 830 292 V 331 H 500 V 435" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="593" y="323" class="label" text-anchor="middle" >Access policy</text>
+<path d="M 850 292 V 356 H 830 V 435" class="edge" marker-end="url(#data-arrow)"/>
+<text x="879" y="353" class="label" text-anchor="middle" >Entra logs</text>
+<path d="M 85 545 V 640" class="edge control" marker-end="url(#data-arrow)"/>
+<path d="M 255 640 V 545" class="edge" marker-end="url(#data-arrow)"/>
+<text x="170" y="578" class="label" text-anchor="middle" >Policies / apps</text>
+<text x="170" y="614" class="label" text-anchor="middle" >Status / reports</text>
+<path d="M 85 790 V 900" class="edge" marker-end="url(#data-arrow)"/>
+<path d="M 255 900 V 790" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="170" y="828" class="label" text-anchor="middle" >Telemetry</text>
+<text x="170" y="871" class="label" text-anchor="middle" >Remote response</text>
+<path d="M 415 575 V 725" class="edge" marker-end="url(#data-arrow)"/>
+<path d="M 585 725 V 575" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="500" y="617" class="label" text-anchor="middle" >Activity / events</text>
+<text x="500" y="675" class="label" text-anchor="middle" >Protection</text>
+<path d="M 830 545 V 655" class="edge" marker-end="url(#data-arrow)"/>
+<text x="830" y="602" class="label" text-anchor="middle" >Selected logs</text>
+<path d="M 830 775 V 905" class="edge"/>
+<text x="830" y="823" class="label" text-anchor="middle" >SIEM uses</text>
+<text x="830" y="853" class="label" text-anchor="middle" >workspace</text>
+<path d="M 170 1020 V 1190" class="edge" marker-end="url(#data-arrow)"/>
+<text x="170" y="1075" class="label" text-anchor="middle" >Endpoint alerts</text>
+<path d="M 500 845 V 1097 H 170" class="edge"/>
+<circle cx="170" cy="1097" r="4" fill="#52657D"/>
+<text x="382" y="1085" class="label" text-anchor="middle" >M365 alerts</text>
+<path d="M 170 1344 V 1450" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="170" y="1402" class="label" text-anchor="middle" >Incidents / hunting</text>
+<path d="M 500 1344 V 1450" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="500" y="1402" class="label" text-anchor="middle" >Exposure / posture</text>
+<path d="M 830 1015 V 1450" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="830" y="1402" class="label" text-anchor="middle" >SIEM investigation</text>
+<rect x="40" y="154" width="260" height="138" rx="12" fill="#EFF3F7" stroke="#93A6BA" stroke-width="1.5"/>
+<text x="170" y="192" class="heading" text-anchor="middle" >Active Directory</text>
+<text x="170" y="222" class="body" text-anchor="middle" >DC01 · Server 2025</text>
+<text x="170" y="250" class="body" text-anchor="middle" >lab.local · AD / SYSVOL</text>
+<text x="170" y="278" class="body" text-anchor="middle" >Domain services + GPO</text>
+<rect x="370" y="154" width="260" height="138" rx="12" fill="#EAF2FF" stroke="#7298C9" stroke-width="1.5"/>
+<text x="500" y="190" class="heading" text-anchor="middle" >Entra Connect Sync</text>
+<text x="500" y="221" class="body" text-anchor="middle" >Users · Groups · Devices</text>
+<text x="500" y="249" class="body" text-anchor="middle" >Selected attributes</text>
+<text x="500" y="277" class="body" text-anchor="middle" >Password Hash Sync</text>
+<rect x="700" y="154" width="260" height="138" rx="12" fill="#EAF2FF" stroke="#7298C9" stroke-width="1.5"/>
+<text x="830" y="191" class="heading" text-anchor="middle" >Microsoft Entra ID</text>
+<text x="830" y="221" class="body" text-anchor="middle" >Conditional Access</text>
+<text x="830" y="249" class="body" text-anchor="middle" >MFA · Compliance</text>
+<text x="830" y="277" class="body" text-anchor="middle" >User-risk evaluation</text>
+<rect x="40" y="435" width="260" height="110" rx="12" fill="#E8F5F3" stroke="#6B9D98" stroke-width="1.5"/>
+<text x="170" y="475" class="heading" text-anchor="middle" >Microsoft Intune</text>
+<text x="170" y="506" class="body" text-anchor="middle" >Policies · Compliance</text>
+<text x="170" y="533" class="body" text-anchor="middle" >Application deployment</text>
+<rect x="40" y="640" width="260" height="150" rx="12" fill="#EFF3F7" stroke="#93A6BA" stroke-width="1.5"/>
+<text x="170" y="669" class="heading" text-anchor="middle" >Windows 11</text>
+<text x="170" y="696" class="body" text-anchor="middle" >Domain joined · 1 device</text>
+<text x="170" y="723" class="body" text-anchor="middle" >Entra Hybrid Joined</text>
+<text x="170" y="750" class="body" text-anchor="middle" >Intune enrolled</text>
+<text x="170" y="778" class="body" text-anchor="middle" >MDE onboarded</text>
+<rect x="40" y="900" width="260" height="120" rx="12" fill="#FFF3E5" stroke="#C49660" stroke-width="1.5"/>
+<text x="170" y="939" class="heading" text-anchor="middle" >Microsoft Defender</text>
+<text x="170" y="970" class="heading" text-anchor="middle" >for Endpoint</text>
+<text x="170" y="1001" class="body" text-anchor="middle" >Telemetry + response</text>
+<rect x="370" y="435" width="260" height="140" rx="12" fill="#FFF3E5" stroke="#C49660" stroke-width="1.5"/>
+<text x="500" y="474" class="heading" text-anchor="middle" >Microsoft 365</text>
+<text x="500" y="506" class="body" text-anchor="middle" >Exchange Online · Teams</text>
+<text x="500" y="535" class="body" text-anchor="middle" >SharePoint · OneDrive</text>
+<text x="500" y="562" class="body" text-anchor="middle" >Protected workloads</text>
+<rect x="370" y="725" width="260" height="120" rx="12" fill="#FFF3E5" stroke="#C49660" stroke-width="1.5"/>
+<text x="500" y="762" class="heading" text-anchor="middle" >Microsoft Defender</text>
+<text x="500" y="791" class="heading" text-anchor="middle" >for Office 365 P2</text>
+<text x="500" y="822" class="body" text-anchor="middle" >Email · Links · Files</text>
+<rect x="700" y="435" width="260" height="110" rx="12" fill="#F0ECFA" stroke="#9C87C3" stroke-width="1.5"/>
+<text x="830" y="474" class="heading" text-anchor="middle" >Entra Diagnostic</text>
+<text x="830" y="503" class="heading" text-anchor="middle" >Settings</text>
+<text x="830" y="533" class="body" text-anchor="middle" >Selected categories</text>
+<rect x="700" y="655" width="260" height="120" rx="12" fill="#F0ECFA" stroke="#9C87C3" stroke-width="1.5"/>
+<text x="830" y="694" class="heading" text-anchor="middle" >Log Analytics</text>
+<text x="830" y="726" class="body" text-anchor="middle" >yaru-sentinel-law</text>
+<text x="830" y="758" class="body" text-anchor="middle" >Partial Entra ingestion</text>
+<rect x="700" y="905" width="260" height="110" rx="12" fill="#F0ECFA" stroke="#9C87C3" stroke-width="1.5"/>
+<text x="830" y="946" class="heading" text-anchor="middle" >Microsoft Sentinel</text>
+<text x="830" y="979" class="body" text-anchor="middle" >SIEM analytics</text>
+<text x="830" y="1006" class="body" text-anchor="middle" >Entra log collection only</text>
+<text x="500" y="1165" class="section" text-anchor="middle" >SECURITY OPERATIONS</text>
+<rect x="40" y="1190" width="260" height="154" rx="12" fill="#FFF3E5" stroke="#C49660" stroke-width="1.5"/>
+<text x="170" y="1231" class="heading" text-anchor="middle" >Microsoft Defender</text>
+<text x="170" y="1261" class="heading" text-anchor="middle" >XDR</text>
+<text x="170" y="1294" class="body" text-anchor="middle" >Alerts · Incidents</text>
+<text x="170" y="1323" class="body" text-anchor="middle" >Device + email evidence</text>
+<rect x="370" y="1190" width="260" height="154" rx="12" fill="#EAF5EB" stroke="#82A086" stroke-width="1.5"/>
+<text x="500" y="1231" class="heading" text-anchor="middle" >Microsoft Security</text>
+<text x="500" y="1261" class="heading" text-anchor="middle" style="font-size:22px">Exposure Management</text>
+<text x="500" y="1294" class="body" text-anchor="middle" >MDE + Entra context</text>
+<text x="500" y="1323" class="body" text-anchor="middle" >Posture · Vulnerabilities</text>
+<rect x="40" y="1450" width="920" height="150" rx="14" fill="#17365D" stroke="#17365D" stroke-width="1.5"/>
+<text x="500" y="1495" class="heading" text-anchor="middle" style="font-size:28px;fill:#FFFFFF">MICROSOFT DEFENDER PORTAL</text>
+<text x="500" y="1535" class="body" text-anchor="middle" style="font-size:22px;fill:#FFFFFF">XDR + Sentinel investigations · Hunting · Exposure views</text>
+<text x="500" y="1572" class="body" text-anchor="middle" style="font-size:22px;fill:#FFFFFF">Remote endpoint response through Microsoft Defender for Endpoint</text>
+<path d="M 40 1660 H 100" class="edge" marker-end="url(#data-arrow)"/>
+<text x="112" y="1667" class="body" text-anchor="start" >Data / sync</text>
+<path d="M 350 1660 H 410" class="edge control" marker-end="url(#data-arrow)"/>
+<text x="423" y="1667" class="body" text-anchor="start" >Policy / view</text>
+<path d="M 683 1660 H 743" class="edge"/>
+<text x="756" y="1667" class="body" text-anchor="start" >Workspace use</text>
+<line x1="40" y1="1701" x2="960" y2="1701" stroke="#D9E3ED" stroke-width="1.5"/>
+<text x="40" y="1738" class="heading" text-anchor="start" style="font-size:22px">Return context to Microsoft Entra ID</text>
+<text x="40" y="1773" class="body" text-anchor="start" >Windows device registration + Intune compliance reporting.</text>
+<text x="40" y="1813" class="body" text-anchor="start" >Exposure Management uses asset context; the portal displays operational views.</text>
+</svg>

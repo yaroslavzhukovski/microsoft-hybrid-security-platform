@@ -27,115 +27,16 @@ Key boundaries:
 
 ---
 
-## Core Architecture
+## Architecture Overview
 
-```mermaid
-flowchart TB
+![Technical architecture showing hybrid identity, one managed Windows endpoint, Microsoft 365 protection, Entra-only Sentinel collection and unified security operations](../../assets/architecture/technical-architecture.svg)
 
-    subgraph ONPREM["On-Premises Environment"]
-        direction LR
-        AD["Active Directory Domain Services<br/>Windows Server 2025 / DC01<br/>lab.local"]
-        GPO["Group Policy"]
-        WIN["Windows 11 Endpoint<br/>Domain Joined / Intune Managed / Defender Onboarded"]
-    end
+The diagram shows primary flows from identity through managed workloads to security operations. The embedded legend distinguishes data flow, policy/interface relationships and workspace use.
 
-    subgraph IDENTITY["Identity & Access"]
-        direction LR
-        CONNECT["Microsoft Entra Connect<br/>Password Hash Synchronization"]
-        ENTRA["Microsoft Entra ID"]
-        IDP["Microsoft Entra ID Protection<br/>(Entra ID P2)"]
-        MFA["Microsoft Authenticator<br/>Multifactor Authentication"]
-        CA["Conditional Access"]
-    end
-
-    subgraph MANAGEMENT["Endpoint Management"]
-        direction LR
-        INTUNE["Microsoft Intune"]
-        SSM["MDE Security Settings Management"]
-        ALTDEVICE["Supported MDE-Managed Devices<br/>Additional capability path<br/>(not validated on a separate endpoint)"]
-    end
-
-    subgraph ENDPOINTSEC["Endpoint Security"]
-        direction LR
-        DEFENDER["Microsoft Defender<br/>Endpoint Protection"]
-    end
-
-    subgraph M365SEC["Microsoft 365 Security"]
-        direction LR
-        M365["Microsoft 365<br/>Exchange Online / Teams"]
-        MDO["Microsoft Defender<br/>for Office 365 P2"]
-    end
-
-    subgraph SIEM["SIEM & Log Analytics"]
-        direction LR
-        CONNECTOR["Microsoft Entra ID<br/>Data Connector"]
-        DCR["Data Collection Rules<br/>(Implemented Collection Configuration)"]
-        LAW["Log Analytics Workspace<br/>yaru-sentinel-law"]
-        SENTINEL["Microsoft Sentinel"]
-    end
-
-    subgraph OPERATIONS["Security Operations"]
-        direction LR
-        XDR["Microsoft Defender XDR"]
-        EXPOSURE["Microsoft Security<br/>Exposure Management"]
-        PORTAL["Microsoft Defender Portal<br/>Unified Security Operations"]
-    end
-
-    AD -->|"GPO scope"| GPO
-    GPO -->|"Domain-based configuration"| WIN
-
-    AD -->|"Identity synchronization"| CONNECT
-    CONNECT -->|"Password Hash Synchronization"| ENTRA
-
-    WIN -.->|"Hybrid device identity"| ENTRA
-
-    ENTRA -->|"Authentication"| MFA
-    ENTRA -->|"Access policy"| CA
-    ENTRA -->|"Identity / sign-in risk evaluation"| IDP
-
-    IDP -.->|"Risk context"| CA
-    CA -.->|"Can require MFA"| MFA
-
-    ENTRA -.->|"Identity / device context"| INTUNE
-    INTUNE -->|"Normal Intune management"| WIN
-
-    INTUNE -.->|"Endpoint Security policy source"| SSM
-    SSM -.->|"Additional supported management path"| ALTDEVICE
-
-    WIN -->|"Endpoint security telemetry"| DEFENDER
-    DEFENDER -.->|"Remote response / containment"| WIN
-
-    DEFENDER -->|"Native endpoint security signals"| XDR
-
-    M365 -->|"Protected workloads"| MDO
-    MDO -->|"Email & collaboration security signals"| XDR
-
-    DEFENDER -.->|"Endpoint / vulnerability context"| EXPOSURE
-    ENTRA -.->|"Identity context"| EXPOSURE
-
-    ENTRA -->|"Identity & activity logs"| CONNECTOR
-    CONNECTOR -->|"Workspace ingestion"| LAW
-
-    LAW ---|"Sentinel-enabled workspace / analytics"| SENTINEL
-
-    XDR -.->|"Operational integration"| PORTAL
-    SENTINEL -.->|"SIEM integration"| PORTAL
-    EXPOSURE -.->|"Exposure context"| PORTAL
-```
-
-The diagram represents several different architectural relationships. The arrows must not all be interpreted as the same type of data flow.
-
-The architecture distinguishes five relationship types:
-
-1. **Identity and device identity** — Active Directory synchronization, Microsoft Entra identity, and hybrid device identity.
-2. **Management and control** — Group Policy, Microsoft Intune, supported MDE Security Settings Management, and endpoint response actions.
-3. **Security telemetry** — endpoint and Microsoft 365 security signals contributing to Microsoft Defender XDR.
-4. **SIEM data ingestion and analysis** — Microsoft Entra telemetry ingested into Log Analytics and analyzed with Microsoft Sentinel.
-5. **Context and operational integration** — Exposure Management and the unified Microsoft Defender security-operations experience.
-
-Solid arrows represent primary implemented flows where appropriate. Dotted arrows represent contextual, control, additional-management, or operational relationships and must not be interpreted as universal telemetry pipelines. The undirected Sentinel relationship indicates that Microsoft Sentinel is enabled on and operates with the Log Analytics workspace rather than acting as a second sequential log store.
-
-The `Supported MDE-Managed Devices` node represents the additional Security Settings Management capability path and does not represent a second validated Windows workstation in this project.
+- **Hybrid identity and access:** Entra Connect synchronizes directory objects, including the Windows computer object, and uses Password Hash Synchronization. Windows completes device registration with Entra ID. Conditional Access evaluates MFA, device compliance and user risk from Entra ID Protection P2; Microsoft Authenticator is the registered MFA method.
+- **Device management:** Intune delivers policies and applications and receives device reporting. Compliance checks include BitLocker, Secure Boot and antivirus. Windows registration and Intune compliance return to Entra ID; these relationships are noted below the diagram to avoid long return arrows.
+- **Security operations:** Endpoint and Microsoft 365 alerts contribute to Defender XDR. Exposure Management uses MDE and Entra asset context. The Defender portal presents investigation and posture views and initiates remote endpoint response through MDE.
+- **SIEM scope:** Sentinel collects Entra logs only. Diagnostic Settings exports selected categories to `yaru-sentinel-law`; ingestion is partial. The Entra solution/data connector supports collection configuration, and DCRs are not shown as a mandatory transport stage. No Defender XDR-to-Sentinel data collection is represented.
 
 ---
 

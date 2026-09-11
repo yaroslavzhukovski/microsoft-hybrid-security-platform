@@ -9,99 +9,92 @@ The design preserves required on-premises dependencies while adding modern secur
 ## Architecture Overview
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#102A43", "lineColor": "#486581"}, "flowchart": {"nodeSpacing": 50, "rankSpacing": 70, "padding": 20}}}%%
 flowchart TB
+    AD["Active Directory<br/>Windows Server / Group Policy"]
+    CONNECT["Microsoft Entra Connect<br/>Users, groups and devices"]
+    ENTRA["Microsoft Entra ID<br/>Conditional Access / MFA"]
 
-    subgraph EXISTING["Existing Environment"]
-        direction LR
-        AD["Active Directory<br/>Windows Server"]
-        DEV["Windows Endpoints"]
-        M365["Microsoft 365"]
-    end
+    INTUNE["Microsoft Intune<br/>Device management"]
+    WIN["Windows 11 endpoint<br/>Domain + Hybrid Joined"]
+    MDE["Microsoft Defender for<br/>Endpoint"]
 
-    subgraph IDMGMT["Identity & Management"]
-        direction LR
-        CONNECT["Microsoft Entra Connect<br/>Password Hash Sync"]
-        ENTRA["Microsoft Entra ID"]
-        IDP["Entra ID Protection P2"]
-        ACCESS["Access Controls<br/>MFA • Conditional Access"]
-        INTUNE["Microsoft Intune"]
-    end
+    M365["Microsoft 365<br/>Email and collaboration"]
+    MDO["Defender for Office 365<br/>Workload protection"]
 
-    subgraph SECURITY["Security Protection & Exposure"]
-        direction LR
-        ENDPOINT["Microsoft Defender<br/>Endpoint Protection"]
-        MDO["Defender for Office 365 P2"]
-        EXPOSURE["Microsoft Security<br/>Exposure Management"]
-    end
+    LAW["Log Analytics workspace<br/>Selected Entra logs"]
+    SENTINEL["Microsoft Sentinel<br/>Log-based investigation"]
 
-    subgraph OPERATIONS["Security Operations"]
-        direction LR
-        XDR["Microsoft Defender XDR"]
-        SENTINEL["Microsoft Sentinel<br/>(Log Analytics workspace)"]
-        PORTAL["Microsoft Defender Portal<br/>Unified Security Operations"]
-    end
+    XDR["Microsoft Defender XDR<br/>Correlated security alerts"]
+    EXPOSURE["Exposure Management<br/>Weaknesses and priorities"]
+    PORTAL["Microsoft Defender Portal<br/>Unified security operations"]
 
-    AD -->|"Identity synchronization"| CONNECT
-    CONNECT --> ENTRA
+    AD -->|"Directory sync"| CONNECT
+    CONNECT -->|"Identity sync"| ENTRA
+    ENTRA -.->|"Identity and enrollment context"| INTUNE
+    INTUNE <-->|"Policies / reporting"| WIN
+    WIN -->|"Device activity"| MDE
 
-    AD -->|"Domain membership / GPO"| DEV
-    DEV -.->|"Hybrid device identity"| ENTRA
+    ENTRA -.->|"Conditional Access decision"| M365
+    MDO -->|"Protects Microsoft 365 workloads"| M365
 
-    ENTRA --> IDP
-    ENTRA --> ACCESS
-    ENTRA -.->|"Identity / device context"| INTUNE
+    ENTRA -->|"Selected Entra logs"| LAW
+    LAW ---|"Workspace used by"| SENTINEL
 
-    INTUNE -->|"Cloud management"| DEV
+    MDE -->|"Endpoint alerts"| XDR
+    MDO -->|"Security alerts"| XDR
 
-    DEV -->|"Endpoint security telemetry"| ENDPOINT
-    M365 -->|"Email & collaboration signals"| MDO
+    XDR -.->|"Incidents / hunting"| PORTAL
+    SENTINEL -.->|"SIEM investigation"| PORTAL
+    XDR -.->|"Asset and risk context"| EXPOSURE
+    EXPOSURE -.->|"Exposure priorities"| PORTAL
 
-    ENDPOINT --> XDR
-    MDO --> XDR
+    classDef identity fill:#EAF2FF,stroke:#7298C9,color:#18324D
+    classDef endpoint fill:#E8F5F3,stroke:#6B9D98,color:#18324D
+    classDef security fill:#FFF3E5,stroke:#C49660,color:#18324D
+    classDef siem fill:#F0ECFA,stroke:#9C87C3,color:#18324D
+    classDef exposure fill:#EAF5EB,stroke:#82A086,color:#18324D
+    classDef portal fill:#17365D,stroke:#17365D,color:#FFFFFF
 
-    ENDPOINT -.->|"Endpoint risk context"| EXPOSURE
-    ENTRA -.->|"Identity context"| EXPOSURE
-
-    ENTRA -->|"Identity & activity telemetry"| SENTINEL
-
-    XDR -.->|"Operational integration"| PORTAL
-    SENTINEL -.->|"SIEM integration"| PORTAL
-    EXPOSURE -.->|"Exposure context"| PORTAL
+    class AD,CONNECT,ENTRA identity
+    class INTUNE,WIN endpoint
+    class MDE,M365,MDO,XDR security
+    class LAW,SENTINEL siem
+    class EXPOSURE exposure
+    class PORTAL portal
 ```
 
-The arrows represent different architectural relationships. Identity synchronization, device identity, management, security telemetry, exposure context, and security-operations integration are separate flows and should not be interpreted as one common data path.
+Solid arrows show primary implemented relationships. Dashed arrows show contextual or interface relationships. The line without an arrow indicates that Sentinel uses the Log Analytics workspace.
 
 ## Preserve and Extend the Existing Environment
 
-Active Directory remains responsible for domain identities, domain-joined Windows devices, Group Policy, and other traditional Windows dependencies.
+Active Directory remains responsible for domain identities, domain membership, DNS, Kerberos and LDAP dependencies. Group Policy is a domain policy mechanism stored in AD and SYSVOL.
 
-Microsoft Entra Connect extends selected on-premises identities into Microsoft Entra ID using Password Hash Synchronization. Windows endpoints can remain domain joined while also participating in Microsoft Entra device identity and cloud-based management.
+Microsoft Entra Connect Sync synchronizes selected users, groups, device objects and identity attributes to Microsoft Entra ID. Password Hash Synchronization supports cloud authentication without transferring plaintext passwords. The Windows 11 endpoint remains domain joined and completes automatic registration with Entra ID, forming its Hybrid Joined identity.
 
 This supports hybrid modernization without requiring an immediate replacement of existing Windows infrastructure.
 
 ## Identity and Endpoint Management
 
-Microsoft Entra ID provides the cloud identity and access layer. Microsoft Authenticator, multifactor authentication, Conditional Access, device context, and Entra ID Protection add stronger authentication, contextual access control, and identity-risk visibility.
+Microsoft Entra ID provides the cloud identity and access layer. Microsoft Authenticator is a registered MFA method; Entra ID Protection P2 supplies identity-risk information. Conditional Access evaluates identity, device, risk and authentication requirements to control access to Microsoft 365.
 
-Microsoft Intune adds centralized cloud-based endpoint management while Group Policy remains available for required domain-based configuration.
+Microsoft Intune sends endpoint policies, configuration and applications, and receives inventory, status and compliance reporting. Compliance can inform Conditional Access decisions. Group Policy remains available for required domain-based configuration.
 
 The responsibilities remain separate:
 
 - Group Policy provides domain-based configuration.
 - Intune provides cloud-based device management and configuration.
-- Microsoft Defender provides endpoint security, detection, investigation, and response.
+- Microsoft Defender for Endpoint provides endpoint security, detection, investigation and response.
 - MFA, Conditional Access, and Entra ID Protection provide different identity-security controls.
 
 This allows cloud management and identity protection to be introduced without treating the different control planes as one system.
 
 ## Security Protection and Exposure Reduction
 
-Microsoft Defender endpoint protection provides prevention, endpoint telemetry, EDR, investigation, and remote response capabilities.
+Microsoft Defender for Endpoint provides prevention, endpoint telemetry, detection, investigation, isolation, Live Response and containment.
 
-Microsoft Defender for Office 365 Plan 2 protects email and collaboration workloads and contributes relevant security signals to broader Microsoft Defender XDR investigations.
+Microsoft Defender for Office 365 Plan 2 protects Exchange Online, Teams, SharePoint and OneDrive workloads and contributes security alerts to Microsoft Defender XDR investigations.
 
-Microsoft Security Exposure Management and Defender Vulnerability Management provide preventive visibility into vulnerabilities, security configuration weaknesses, critical assets, attack surface, security recommendations, and remediation priorities.
+Microsoft Security Exposure Management and Defender Vulnerability Management can provide preventive visibility into vulnerabilities, security configuration weaknesses, critical assets, attack surface, security recommendations, and remediation priorities.
 
 Exposure information is broader than endpoint alerts alone and can include context from devices, identities, and other connected security assets.
 
@@ -109,7 +102,7 @@ Microsoft Secure Score provides an additional posture view and should not be int
 
 ## SIEM and Unified Security Operations
 
-Microsoft Entra identity and activity telemetry is ingested into a Log Analytics workspace and analyzed with Microsoft Sentinel.
+Selected Microsoft Entra identity and activity logs are collected in a Log Analytics workspace and analyzed in Microsoft Sentinel. Collection is currently partial; this project uses Sentinel for Entra logs.
 
 Microsoft Sentinel provides SIEM analytics, KQL-based investigation, hunting, and extensibility to additional data sources.
 
@@ -124,29 +117,17 @@ Detailed data paths and integration boundaries are documented in the [Technical 
 ## Security Lifecycle
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#102A43", "lineColor": "#486581"}, "flowchart": {"nodeSpacing": 50, "rankSpacing": 70, "padding": 20}}}%%
+%%{init: {"flowchart": {"rankSpacing": 20, "padding": 10}}}%%
 flowchart TB
-
-    BUILD["BUILD<br/>Hybrid identity<br/>Endpoint integration"]
-
-    PROTECT["PROTECT<br/>Identity<br/>Endpoints<br/>Microsoft 365"]
-
-    REDUCE["REDUCE EXPOSURE<br/>Vulnerabilities<br/>Configuration risk"]
-
-    DETECT["DETECT<br/>Defender signals<br/>Sentinel telemetry"]
-
-    INVESTIGATE["INVESTIGATE<br/>Incidents<br/>Evidence<br/>Hunting"]
-
-    RESPOND["RESPOND<br/>Containment<br/>Remediation<br/>Recovery"]
-
-    BUILD --> PROTECT --> REDUCE --> DETECT --> INVESTIGATE --> RESPOND
+    BUILD["Build"] --> PROTECT["Protect"]
+    PROTECT --> REDUCE["Reduce exposure"]
+    REDUCE --> DETECT["Detect"]
+    DETECT --> INVESTIGATE["Investigate"]
+    INVESTIGATE --> RESPOND["Respond"]
+    RESPOND -.-> BUILD
 ```
 
-The platform is organized around the operating lifecycle:
-
-**Build → Protect → Reduce Exposure → Detect → Investigate → Respond**
-
-This represents an operational security model rather than a linear telemetry or data flow. These activities can operate continuously and in parallel.
+The lifecycle is continuous and overlapping: prevention, detection, investigation and response can operate in parallel. The return arrow represents ongoing review and improvement, not a requirement to finish one activity before starting another.
 
 ## Business Outcomes
 
