@@ -34,7 +34,7 @@
 <path d="M 830 292 V 331 H 500 V 435" class="edge control" marker-end="url(#data-arrow)"/>
 <text x="593" y="323" class="label" text-anchor="middle" >Access policy</text>
 <path d="M 850 292 V 356 H 830 V 435" class="edge" marker-end="url(#data-arrow)"/>
-<text x="879" y="353" class="label" text-anchor="middle" >Entra logs</text>
+<text x="900" y="353" class="label" text-anchor="middle" >Entra logs</text>
 <path d="M 85 545 V 640" class="edge control" marker-end="url(#data-arrow)"/>
 <path d="M 255 640 V 545" class="edge" marker-end="url(#data-arrow)"/>
 <text x="170" y="578" class="label" text-anchor="middle" >Policies / apps</text>
